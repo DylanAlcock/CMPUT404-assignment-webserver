@@ -1,5 +1,7 @@
+#!/usr/bin/env python3
 #  coding: utf-8 
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -32,6 +34,19 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
+
+        header = self.data.decode().split('\n')
+        print("HEADER:" , header)
+        
+        req = header[0].split(" ")
+        if req[0] == "GET":
+            url = "/www" + req[1]
+            print("URL:", url)
+
+        elif request[0] is not 'GET':
+            print("INVALID REQUEST")
+
+
         self.request.sendall(bytearray("OK",'utf-8'))
 
 if __name__ == "__main__":
