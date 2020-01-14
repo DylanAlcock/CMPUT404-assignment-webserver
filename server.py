@@ -36,19 +36,44 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print ("Got a request of: %s\n" % self.data)
 
         header = self.data.decode().split('\n')
-        print("HEADER:" , header)
+        print("HEADER: " , header)
         
         req = header[0].split(" ")
         if req[0] == "GET":
+            
             url = "/www" + req[1]
-            print("URL:", url)
+            print("URL", url)            
+            
+            if req[1].endswith(".css"):
+                print("THIS SHOULD BE HTTP/1.1", req[2][:-2])
+                send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/css\r\n\r\n" + url,"utf-8")
+                #self.request.send_response(200)
+                #self.request.send_header('Content-type', 'text/css')
+                
+            elif req[1].endswith(".html"):
+                send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/html\r\n\r\n" + url,"utf-8")
+                #self.request.send_response(200)
+                #self.request.send_header('Content-type', 'text/html')
+                
+            elif req[1].endswith("/"):
+                url = url + "index.html"
+                send = bytearray(req[2][:-1] + " 200 OK\r\nLocation:Location: http://127.0.0.1:8080/\r\n\r\n" + url,"utf-8")
+            
+            else:
+                send = bytearray(req[2][:-1] + " 404 Not Found\r\n\r\n", "utf-8")
+                
+                
+            
 
-        elif request[0] is not 'GET':
+        elif req[0] is not 'GET':
             print("INVALID REQUEST")
 
 
-        self.request.sendall(bytearray("OK",'utf-8'))
+        self.request.sendall(send)
+        
+        
 
+        
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
 
@@ -59,3 +84,5 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
+    
+    
