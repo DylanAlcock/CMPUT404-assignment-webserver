@@ -41,32 +41,30 @@ class MyWebServer(socketserver.BaseRequestHandler):
         req = header[0].split(" ")
         if req[0] == "GET":
             
-            url = "/www" + req[1]
+            url = os.getcwd() + "/www" + req[1]
             print("URL", url)            
-            
-            if req[1].endswith(".css"):
-                print("THIS SHOULD BE HTTP/1.1", req[2][:-2])
-                send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/css\r\n\r\n" + url,"utf-8")
-                #self.request.send_response(200)
-                #self.request.send_header('Content-type', 'text/css')
-                
-            elif req[1].endswith(".html"):
-                send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/html\r\n\r\n" + url,"utf-8")
-                #self.request.send_response(200)
-                #self.request.send_header('Content-type', 'text/html')
-                
-            elif req[1].endswith("/"):
+         
+            if os.path.isfile(url):
+                file_type = url.split(".")[-1]
+                print("FILE TYPE =" + file_type)
+                if file_type == "css" or file_type == "html":
+                    send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/" + file_type + "\r\n\r\n" + url,"utf-8")
+                else:
+                    send = bytearray(req[2][:-1] + " 404 Not Found\r\n\r\n", "utf-8")
+                       
+            elif req[1].endswith("/") and os.path.isdir(url):
                 url = url + "index.html"
-                send = bytearray(req[2][:-1] + " 200 OK\r\nLocation:Location: http://127.0.0.1:8080/\r\n\r\n" + url,"utf-8")
-            
+                send = bytearray(req[2][:-1] + " 200 OK\r\nLocation: http://127.0.0.1:8080/\r\nContent-Type:text/html\r\n\r\n" + url,"utf-8")
+                
+            elif req[1][-1].isalpha() and os.path.isdir(url):
+                url = url + "/index.html"
+                send = bytearray(req[2][:-1] + " 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080/deep/" + "\r\n\r\n" ,"utf-8")
+                
             else:
                 send = bytearray(req[2][:-1] + " 404 Not Found\r\n\r\n", "utf-8")
-                
-                
-            
 
-        elif req[0] is not 'GET':
-            print("INVALID REQUEST")
+        else:
+            send = bytearray(req[2][:-1] + " 405 Method Not Allowed\r\n\r\n", "utf-8")
 
 
         self.request.sendall(send)
