@@ -2,7 +2,6 @@
 #  coding: utf-8 
 import socketserver
 import os
-import urllib
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -37,27 +36,23 @@ class MyWebServer(socketserver.BaseRequestHandler):
         #print ("Got a request of: %s\n" % self.data)
 
         header = self.data.decode().split('\n')
-        #print("HEADER: " , header)
         
         req = header[0].split(" ")
         if req[0] == "GET":
             
-            #get the path of the request
+            #Get the path of the request
             url = "./www" + req[1]
             #print("URL", url)
-            #print()
          
-            #if the path leads to a file, set the the FILE_TYPE and send 200 OK
+            #if the path leads to a file, set the the FILE_TYPE and send 200 OK 
+            # if the path doesnt try to move up directories
             if os.path.isfile(url):
                 file_type = url.split(".")[-1]
-                #print("FILE TYPE =" + file_type)
                 
-                #Check if the file is css or html if not return 404 error
-                if file_type == "css" or file_type == "html":
+                #Check if url tries to move up directories if so return 404 error
+                if "/../" not in url:
                     page = open(url, 'rb').read()
-                    #print(page)
                     content_length = str(len(page))
-                    
                     send = bytearray(req[2][:-1] + " 200 OK\r\nContent-Type:text/" + file_type + "\r\n" + "Content-length:"+ content_length + "\r\n\r\n","utf-8")
                     
                 else:
@@ -66,13 +61,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     send = bytearray(req[2][:-1] + " 404 Not Found\r\nContent-Type: text/html\r\nContent-Length:" + content_length + "\r\n\r\n", "utf-8")
                     page = page.encode()
                        
-            #if the path is a directory and has / at the end open index.html at that directory           
+            #if the path is a directory and has / at the end, open index.html at that directory           
             elif req[1].endswith("/") and os.path.isdir(url):
                 url = url + "index.html"
-                send = bytearray(req[2][:-1] + " 200 OK\r\nLocation: http://127.0.0.1:8080/\r\nContent-Type:text/html\r\n\r\n","utf-8")
                 page = open(url, 'rb').read()
-                #print(page)
                 content_length = str(len(page))
+                send = bytearray(req[2][:-1] + " 200 OK\r\nLocation: http://127.0.0.1:8080/\r\nContent-Type:text/html\r\nContent-Length:" + content_length + "\r\n\r\n","utf-8")
                 
             #If the path is a directory and doesn't have a / at the end 
             # add a / to the path and open index.html at that directory    
@@ -81,8 +75,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 page = open(url, 'rb').read()
                 #print(page)
                 content_length = str(len(page))                 
-                send = bytearray(req[2][:-1] + " 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080/deep/" + "\r\n\r\n", "utf-8")
-               
+                send = bytearray(req[2][:-1] + " 301 Moved Permanently\r\nLocation: http://127.0.0.1:8080" + req[1] + "/\r\n\r\n", "utf-8")               
                 
             #If path is not a file or directory return 404 error
             else:
@@ -96,16 +89,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
             page  = "<!DOCTYPE html>\n<html><body>HTTP/1.1 405 Method Not Allowed "+ req[0] + "</body></html>"
             content_length = str(len(page)) 
             send = bytearray("HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\r\nContent-Length:" + content_length + "\r\n\r\n<", "utf-8")
-            page  = "<!DOCTYPE html>\n<html><body>HTTP/1.1 405 Method Not Allowed "+ req[0] + "</body></html>"
             page = page.encode()
 
-
+        #Send the response and the page
         self.request.send(send)
         self.request.send(page)
         
-        
-        
-
         
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
@@ -117,5 +106,4 @@ if __name__ == "__main__":
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
-    
     

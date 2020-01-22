@@ -24,3 +24,8 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
+Used website to learn more about how the webserver should function and what it looks like. https://www.bogotobogo.com/python/python_network_programming_socketserver_framework_for_network_servers.php
+
+Used to implement checking the url to see if it was a diretory/file or not. https://stackabuse.com/python-check-if-a-file-or-directory-exists/
+
+Used for learning how to open files and set correct options. https://www.guru99.com/reading-and-writing-files-in-python.html#3
