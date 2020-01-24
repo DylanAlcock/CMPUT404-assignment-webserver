@@ -18,6 +18,14 @@ import os
 # limitations under the License.
 #
 #
+# Copyright 2020 Dylan Alcock 
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
 # Furthermore it is derived from the Python documentation examples thus
 # some of the code is Copyright © 2001-2013 Python Software
 # Foundation; All Rights Reserved
